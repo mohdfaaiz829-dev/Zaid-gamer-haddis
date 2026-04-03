@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Zaid Bhai Daily Hadith</title>
+
+<style>
+/* ==== BODY & BACKGROUND ==== */
+body {
+    margin: 0;
+    font-family: 'Segoe UI', sans-serif;
+    color: white;
+    text-align: center;
+    transition: 0.4s;
+    min-height: 100vh;
+
+    /* Mobile-friendly background */
+    background: url('WhatsApp Image 2026-04-03 at 12.37.34 PM.jpeg') no-repeat center center;
+    background-size: cover;       /* fills screen without stretching */
+    background-attachment: fixed; /* stays in place on scroll */
+}
+
+/* Dark Mode Background */
+body.dark {
+    background: url('https://images.unsplash.com/photo-1505678261036-a3fcc5e884ee') no-repeat center center;
+    background-size: cover;
+}
+
+/* Overlay for readability */
+body::before {
+    content: "";
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.55);
+    z-index: -1;
+}
+
+/* ==== HEADER ==== */
+header {
+    padding: 20px;
+    background: rgba(0,0,0,0.5);
+}
+
+/* ==== CONTAINER & HADITH BOX ==== */
+.container {
+    padding: 20px;
+}
+
+.hadith-box {
+    background: rgba(255,255,255,0.15);
+    backdrop-filter: blur(10px);
+    padding: 25px;
+    border-radius: 15px;
+    max-width: 600px;
+    margin: auto;
+    box-shadow: 0 5px 25px rgba(0,0,0,0.5);
+    transition: opacity 0.4s ease, transform 0.4s ease;
+}
+
+/* ==== TEXT ==== */
+.arabic {
+    font-size: 24px;
+    margin-bottom: 15px;
+    direction: rtl;
+    font-family: 'Amiri', serif;
+    line-height: 1.6;
+}
+
+.english {
+    font-size: 18px;
+}
+
+/* ==== BUTTONS ==== */
+button {
+    margin: 8px;
+    padding: 10px 18px;
+    border: none;
+    background: #ff9800;
+    color: white;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+button:hover {
+    background: #e68900;
+    transform: scale(1.05);
+}
+
+/* ==== FOOTER ==== */
+footer {
+    margin-top: 30px;
+    padding: 15px;
+    background: rgba(0,0,0,0.6);
+}
+
+/* ==== RESPONSIVE ==== */
+@media (max-width: 600px) {
+    .arabic { font-size: 22px; }
+    .english { font-size: 16px; }
+    .hadith-box { padding: 20px; }
+}
+</style>
+
+<!-- Google Arabic Font -->
+<link href="https://fonts.googleapis.com/css2?family=Amiri&display=swap" rel="stylesheet">
+</head>
+
+<body>
+
+<header>
+    <h1>🌙 Zaid Bhai Daily Hadith</h1>
+    <p>Daily Sunnah Reminder 🤲</p>
+</header>
+
+<div class="container">
+    <div class="hadith-box" id="box">
+        <div class="arabic" id="arabic"></div>
+        <div class="english" id="english"></div>
+
+        <button onclick="nextHadith()">Next</button>
+        <button onclick="playAudio()">🔊 Listen</button>
+        <button onclick="copyHadith()">📋 Copy</button>
+        <button onclick="shareHadith()">📤 Share</button>
+        <button onclick="toggleMode()">🌗 Mode</button>
+    </div>
+</div>
+
+<footer>
+    <p>© 2026 Zaid Bhai | Daily Hadith</p>
+</footer>
+
+<script>
+const hadiths = [
+    { arabic: "إِنَّمَا الْأَعْمَالُ بِالنِّيَّاتِ", english: "Actions are judged by intentions. (Bukhari & Muslim)" },
+    { arabic: "خَيْرُكُمْ أَحْسَنُكُمْ أَخْلَاقًا", english: "The best among you are those with the best manners." },
+    { arabic: "يَسِّرُوا وَلَا تُعَسِّرُوا", english: "Make things easy and do not make them difficult." },
+    { arabic: "اللَّهُ رَفِيقٌ يُحِبُّ الرِّفْقَ", english: "Allah is gentle and loves gentleness." },
+    { arabic: "مَنْ كَانَ يُؤْمِنُ بِاللَّهِ فَلْيَقُلْ خَيْرًا", english: "Speak good or remain silent." }
+];
+
+let currentHadith = null;
+
+// Daily Hadith
+function getDailyHadith() {
+    const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD
+    let hash = 0;
+    for (let i = 0; i < today.length; i++) hash += today.charCodeAt(i);
+    return hadiths[hash % hadiths.length];
+}
+
+// Show Hadith
+function showHadith(h) {
+    currentHadith = h;
+    const box = document.getElementById("box");
+    box.style.opacity = 0;
+    box.style.transform = "scale(0.95)";
+    setTimeout(() => {
+        document.getElementById("arabic").innerText = h.arabic;
+        document.getElementById("english").innerText = h.english;
+        box.style.opacity = 1;
+        box.style.transform = "scale(1)";
+    }, 200);
+}
+
+// Next Hadith
+function nextHadith() {
+    let random;
+    do { random = Math.floor(Math.random() * hadiths.length); }
+    while (hadiths[random] === currentHadith);
+    showHadith(hadiths[random]);
+}
+
+// Audio
+function playAudio() {
+    window.speechSynthesis.cancel();
+    let voices = speechSynthesis.getVoices();
+    let arabicVoice = voices.find(v => v.lang.includes("ar"));
+    let englishVoice = voices.find(v => v.lang.includes("en"));
+    let arabicSpeech = new SpeechSynthesisUtterance(currentHadith.arabic);
+    let englishSpeech = new SpeechSynthesisUtterance(currentHadith.english);
+    arabicSpeech.voice = arabicVoice;
+    englishSpeech.voice = englishVoice;
+    arabicSpeech.onend = () => speechSynthesis.speak(englishSpeech);
+    speechSynthesis.speak(arabicSpeech);
+}
+
+// Copy Hadith
+function copyHadith() {
+    let text = currentHadith.arabic + "\n\n" + currentHadith.english;
+    navigator.clipboard?.writeText(text).then(()=>alert("Copied!")).catch(()=>alert("Copy failed"));
+}
+
+// Share Hadith
+function shareHadith() {
+    let text = currentHadith.arabic + "\n\n" + currentHadith.english + "\n\n- Zaid Bhai Daily Hadith";
+    if (navigator.share) navigator.share({ title: "🌙 Daily Hadith", text }).catch(()=>{});
+    else alert("Sharing not supported on your device");
+}
+
+// Dark Mode
+function toggleMode() {
+    document.body.classList.toggle("dark");
+    localStorage.setItem("mode", document.body.classList.contains("dark") ? "dark" : "light");
+}
+
+// Load saved mode
+if (localStorage.getItem("mode")==="dark") document.body.classList.add("dark");
+
+// Load first hadith
+showHadith(getDailyHadith());
+</script>
+
+</body>
+</html>
